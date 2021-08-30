@@ -22,6 +22,7 @@ class BottomNavyBar extends StatelessWidget {
     required this.items,
     required this.onItemSelected,
     this.curve = Curves.linear,
+    this.itemHeight,
   })  : assert(items.length >= 2 && items.length <= 5),
         super(key: key);
 
@@ -62,6 +63,9 @@ class BottomNavyBar extends StatelessWidget {
   /// Used to configure the animation curve. Defaults to [Curves.linear].
   final Curve curve;
 
+  /// Height of animated container box. Defaults to maxFinite
+  final double? itemHeight;
+
   @override
   Widget build(BuildContext context) {
     final bgColor = backgroundColor ?? Theme.of(context).bottomAppBarColor;
@@ -96,6 +100,7 @@ class BottomNavyBar extends StatelessWidget {
                   itemCornerRadius: itemCornerRadius,
                   animationDuration: animationDuration,
                   curve: curve,
+                  itemHeight: itemHeight,
                 ),
               );
             }).toList(),
@@ -114,6 +119,7 @@ class _ItemWidget extends StatelessWidget {
   final double itemCornerRadius;
   final Duration animationDuration;
   final Curve curve;
+  final double? itemHeight;
 
   const _ItemWidget({
     Key? key,
@@ -124,6 +130,7 @@ class _ItemWidget extends StatelessWidget {
     required this.itemCornerRadius,
     required this.iconSize,
     this.curve = Curves.linear,
+    required this.itemHeight,
   }) : super(key: key);
 
   @override
@@ -133,12 +140,11 @@ class _ItemWidget extends StatelessWidget {
       selected: isSelected,
       child: AnimatedContainer(
         width: isSelected ? 130 : 50,
-        height: double.maxFinite,
+        height: itemHeight ?? double.maxFinite,
         duration: animationDuration,
         curve: curve,
         decoration: BoxDecoration(
-          color:
-              isSelected ? item.activeColor.withOpacity(0.2) : backgroundColor,
+          color: isSelected ? item.activeColor.withOpacity(item.activeOpacity) : backgroundColor,
           borderRadius: BorderRadius.circular(itemCornerRadius),
         ),
         child: SingleChildScrollView(
@@ -156,9 +162,9 @@ class _ItemWidget extends StatelessWidget {
                   data: IconThemeData(
                     size: iconSize,
                     color: isSelected
-                        ? item.activeColor.withOpacity(1)
+                        ? item.iconActiveColor.withOpacity(1)
                         : item.inactiveColor == null
-                            ? item.activeColor
+                            ? item.iconActiveColor
                             : item.inactiveColor,
                   ),
                   child: item.icon,
@@ -192,9 +198,11 @@ class BottomNavyBarItem {
   BottomNavyBarItem({
     required this.icon,
     required this.title,
+    this.iconActiveColor = Colors.black,
     this.activeColor = Colors.blue,
     this.textAlign,
     this.inactiveColor,
+    this.activeOpacity = 1.0,
   });
 
   /// Defines this item's icon which is placed in the right side of the [title].
@@ -214,4 +222,8 @@ class BottomNavyBarItem {
   ///
   /// This will take effect only if [title] it a [Text] widget.
   final TextAlign? textAlign;
+
+  final double activeOpacity;
+
+  final Color iconActiveColor;
 }
